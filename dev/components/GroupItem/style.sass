@@ -1,0 +1,74 @@
+.group__item
+  display: flex
+  flex-direction: column
+  width: 30%
+  margin: 20px 0
+  color: #777777
+  background-color: white
+  border: 1px solid #AAAAAA
+  box-shadow: 5px 5px 8px 2px lightgray
+
+@media (max-width: 800px)
+  .group__item
+    width: 100%
+
+.group__item-title
+  display: flex
+  justify-content: flex-start
+  align-items: flex-end
+  padding-top: 12px
+  p
+    font-weight: bold
+    margin-left: 10px
+    margin-bottom: 0
+
+.group__item-cover
+  position: relative
+  top: 0
+  left: 0
+  width: 100%
+  height: 160px
+  background-position: top
+  background-size: cover
+
+.group__item-avatar
+  display: block
+  position: absolute
+  right: 20px
+  bottom: -40px
+  width: 100px
+  height: 100px
+  border: 4px solid white
+  border-radius: 50%
+  background-position: top
+  background-size: contain
+  background-repeat: no-repeat
+
+.group__item-body
+  display: flex
+  flex-direction: column
+  padding: 10px
+  a
+    text-decoration: none
+
+.group__item-footer
+  display: flex
+  justify-content: flex-end
+  align-items: center
+
+.news__image
+  display: block
+  width: 100%
+  height: 200px
+  text-align: center
+  vertical-align: center
+  border: 1px solid #777777
+
+.news__ref
+  padding: 10px
+  a
+    text-decoration: none
+
+.empty
+  padding: 10px
+  color: #AAAAAA
