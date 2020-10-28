@@ -32,6 +32,7 @@ const Auth = () => {
         setLoading(true);
         fetch(baseURL+'/users/authentication/email/', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },

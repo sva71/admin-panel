@@ -1,4 +1,9 @@
-const settingsReducer = (state, action) => {
+const defaultSettings = {
+    baseURL: 'http://89.223.94.143:3255/api/v1',
+    authenticated: false
+}
+
+const settingsReducer = (state = defaultSettings, action) => {
 
     const {payload} = action;
 
@@ -7,12 +12,10 @@ const settingsReducer = (state, action) => {
             ...state,
             authenticated: payload
         }
-        default: return {
-            baseURL: 'http://89.223.94.143:3255/api/v1',
-            authenticated: false
-        }
+        default: return state
 
     }
+
 }
 
 export default settingsReducer;

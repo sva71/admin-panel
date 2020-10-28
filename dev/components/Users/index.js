@@ -2,7 +2,6 @@ import React, {useState, useEffect} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import {Container, Col, Row, Form, Button, Spinner} from 'react-bootstrap';
 import {updateUsers} from '../../actions';
-import axios from 'axios';
 
 import style from './style.sass';
 
@@ -10,26 +9,26 @@ const Users = () => {
 
     const [users, setUsers] = useState(useSelector(store => store.users));
     const [changed, setChanged] = useState(false);
+    const [searchEmail, setSearchEmail] = useState('');
 
+    const {baseURL} = useSelector(store => store.settings);
     const dispatch = useDispatch();
 
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        axios.get('https://jsonplaceholder.typicode.com/users')
-            .then(response => response.data)
-            .then(data => data.map((item) => {return {...item, role: 'user'}}))
-            .then(data => {
-                setLoading(false);
-                setUsers(data);
-                dispatch(updateUsers(data));
-            })
-    }, []);
+    const [loading, setLoading] = useState(false);
 
     const userChanged = (e, changedItem) => {
         changedItem.role=e.target.value;
         setUsers(users.map((item) => item.id === changedItem.id ? changedItem : item));
         setChanged(true);
+    }
+
+    const searchClicked = () => {
+        fetch(baseURL + '/users/' + searchEmail, {
+            method: 'GET',
+            credentials: 'include'
+        })
+            .then(response => response.json())
+            .then(json => console.log(json))
     }
 
     const saveClicked = () => {
@@ -49,6 +48,22 @@ const Users = () => {
             <Container>
                 <Form>
 
+
+                    <Form.Label>E-mail пользователя:</Form.Label>
+                    <Form.Control
+                        type="email"
+                        value={searchEmail}
+                        onChange={(e) => setSearchEmail(e.target.value)}
+                    />
+                    <Button
+                        variant="success"
+                        className="mt-3"
+                        onClick={searchClicked}
+                    >
+                        Найти
+                    </Button>
+
+
                 {
                     users.map((item, index) => (
                         <Row className={style['user-item']} key={index}>
@@ -66,17 +81,18 @@ const Users = () => {
                     ))
                 }
 
-                <Button variant="primary"
-                        className={style['save-button']}
-                        disabled={!changed}
-                        onClick={saveClicked}
+                </Form>
+
+
+                {users.length ? (<Button variant="primary"
+                    className={style['save-button'] + ' mt-3'}
+                    disabled={!changed}
+                    onClick={saveClicked}
                 >
                     Сохранить
-                </Button>
+                </Button>) : (<></>)}
 
-                </Form>
-            </Container> )}
-
+            </Container>)}
 
         </div>
     )
