@@ -9,6 +9,7 @@ import Button from "react-bootstrap/Button";
 import {updateGroup, updateNavigation} from '../../actions';
 
 import style from '../GroupEdit/style.sass';
+import Navigation from "../Navigation";
 
 const NewsEdit = (props) => {
 
@@ -27,7 +28,7 @@ const NewsEdit = (props) => {
     const navigation = [
         {
             name: 'Группы',
-            link: '/'
+            link: '/groups'
         },
         {
             name: group.name,
@@ -69,7 +70,8 @@ const NewsEdit = (props) => {
     }
 
     return (
-
+        <>
+        <Navigation />
         <div className={style.wrapper}>
             <Form>
 
@@ -112,6 +114,7 @@ const NewsEdit = (props) => {
             </Form>
 
         </div>
+        </>
 
     )
 }

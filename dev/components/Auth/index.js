@@ -13,6 +13,7 @@ const Auth = () => {
 
     const {baseURL} = useSelector(store => store.settings);
     const dispatch = useDispatch();
+    const {rootPath} = useSelector(store => store.settings);
     const history = useHistory();
 
     const [email, setEmail] = useState('');
@@ -29,16 +30,19 @@ const Auth = () => {
     }
 
     const doLogin = () => {
+        // dispatch(setAuthenticated(true));
+        // history.push('/groups');
         setLoading(true);
-        fetch(baseURL+'/users/authentication/email/', {
+        const request = fetch(baseURL+'/users/authentication/email/', {
             method: 'POST',
-            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },
             body: JSON.stringify({ email, password, device: {
                 name: 'PC'} })
-        })
+        });
+
+        request
             .then(response => response.json())
             .then(json => {
                 setLoading(false);
@@ -48,7 +52,12 @@ const Auth = () => {
                     dispatch(setAuthenticated(true));
                     history.push('/groups');
                 }
-            });
+            })
+            .catch(error => {
+                setLoading(false);
+                setAuthError({ isError: true, errorMsg: error.toString() })
+            })
+
     }
 
     return (

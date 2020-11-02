@@ -32,7 +32,7 @@ const NewsItem = ({id, image, body, gId}) => {
     return (
         <div className={style.group__item}>
 
-            <div className={style['group__item-cover']} style={imageBgr}></div>
+            <div className={style['group__item-cover']} style={imageBgr} />
 
             <div className={style['group__item-body']}>
                 <p>{brief}</p>

@@ -1,39 +1,65 @@
-import React, {useState, useEffect} from 'react';
-import {useSelector, useDispatch} from 'react-redux';
+import React, {useState} from 'react';
+import {useSelector} from 'react-redux';
 import {Container, Col, Row, Form, Button, Spinner} from 'react-bootstrap';
-import {updateUsers} from '../../actions';
 
 import style from './style.sass';
+import Alert from "react-bootstrap/Alert";
 
 const Users = () => {
 
-    const [users, setUsers] = useState(useSelector(store => store.users));
+    const [user, setUser] = useState(undefined);
     const [changed, setChanged] = useState(false);
     const [searchEmail, setSearchEmail] = useState('');
+    const [userError, setUserError] = useState({ isError: false, errorMsg: ''});
 
-    const {baseURL} = useSelector(store => store.settings);
-    const dispatch = useDispatch();
+    const {baseURL} =
+        useSelector(store => store.settings);
 
     const [loading, setLoading] = useState(false);
 
-    const userChanged = (e, changedItem) => {
-        changedItem.role=e.target.value;
-        setUsers(users.map((item) => item.id === changedItem.id ? changedItem : item));
+    const userChanged = (e) => {
+        setUser({...user, role: e.target.value});
         setChanged(true);
     }
 
     const searchClicked = () => {
+        setLoading(true);
         fetch(baseURL + '/users/' + searchEmail, {
             method: 'GET',
             credentials: 'include'
         })
             .then(response => response.json())
-            .then(json => console.log(json))
+            .then(json => {
+                setLoading(false);
+                if (json.error) {
+                    setUserError({ isError: true, errorMsg: json.error.message })
+                } else {
+                    setUser(json.data);
+                    setSearchEmail('');
+                }
+            })
+            .catch(error => {
+                setLoading(false);
+                setUserError({ isError: true, errorMsg: error.toString() })
+            })
     }
 
     const saveClicked = () => {
-        dispatch(updateUsers(users));
-        setChanged(false);
+        setLoading(true);
+        fetch(baseURL + '/users/' + user.ID + '?_role=' + user.role, {
+            method: 'PATCH',
+            credentials: 'include'
+        })
+            .then(response => response.json())
+            .then(json => {
+                setLoading(false);
+                if (json.error) {
+                    setUserError({ isError: true, errorMsg: json.error.message })
+                } else {
+                    setUser(undefined);
+                    setChanged(false);
+                }
+            })
     }
 
     return (
@@ -46,8 +72,12 @@ const Users = () => {
                 ) : (
 
             <Container>
-                <Form>
 
+                { userError.isError ? (
+                    <Alert variant="danger">Ошибка поиска: {userError.errorMsg}</Alert>
+                ) : (<></>) }
+
+                <Form>
 
                     <Form.Label>E-mail пользователя:</Form.Label>
                     <Form.Control
@@ -65,26 +95,25 @@ const Users = () => {
 
 
                 {
-                    users.map((item, index) => (
-                        <Row className={style['user-item']} key={index}>
-                            <Col>{item.name}</Col>
-                            <Col>{item.email}</Col>
+                    user ? (
+                        <Row className={style['user-item']}>
+                            <Col>{user.name}</Col>
+                            <Col>{user.email}</Col>
                             <Col>
-                                <Form.Control as="select" value={item.role}
-                                              onChange={(e, changedItem) =>
-                                                  userChanged(e, item)}>
+                                <Form.Control as="select" value={user.role}
+                                    onChange={userChanged}>
                                     <option>administrator</option>
                                     <option>user</option>
                                 </Form.Control>
                             </Col>
                         </Row>
-                    ))
+                    ) : (<></>)
                 }
 
                 </Form>
 
 
-                {users.length ? (<Button variant="primary"
+                {user ? (<Button variant="primary"
                     className={style['save-button'] + ' mt-3'}
                     disabled={!changed}
                     onClick={saveClicked}

@@ -1,5 +1,5 @@
 import React from 'react';
-import {useDispatch} from "react-redux";
+import {useSelector, useDispatch} from "react-redux";
 import {useHistory} from 'react-router-dom';
 
 import Button from "../Button";
@@ -9,7 +9,9 @@ import style from './style.sass';
 import useOkCancelModal from "../../hooks/useOkCancelModal";
 import {deleteGroup} from "../../actions";
 
-const GroupItem = ( { id, cover, avatar, name, description, link, news } ) => {
+const GroupItem = ( { id, cover, avatar, name, description, link, newsTotal } ) => {
+
+    const {baseURL} = useSelector(store => store.settings);
 
     const history = useHistory();
     const dispatch = useDispatch();
@@ -17,16 +19,16 @@ const GroupItem = ( { id, cover, avatar, name, description, link, news } ) => {
     const deleteModal = useOkCancelModal('Внимание!',
         () => (<p>Вы действительно хотите удалить эту группу новостей?</p>),
         () => {
-            news.length ? alert('В этой группе есть новости, ее нельзя удалить.') :
+            newsTotal ? alert('В этой группе есть новости, ее нельзя удалить.') :
                 dispatch(deleteGroup(id))
         });
 
     const coverImage = {
-        backgroundImage: `url("${cover}")`
+        backgroundImage: `url("${baseURL}/s/files/${cover}")`
     }
 
     const avatarImage = {
-        backgroundImage: `url("${avatar}")`
+        backgroundImage: `url("${baseURL}/s/files/${avatar}")`
     }
 
     return (
@@ -49,12 +51,13 @@ const GroupItem = ( { id, cover, avatar, name, description, link, news } ) => {
             </div>
 
             {
-                news.length ? (
-                    <div className={style.news__ref}>
-                        <a href={`/#/groups/${id}/news`}>К новостям группы...</a>
+                newsTotal ? (
+                    <div className={style.news__ref}
+                        onClick={() => history.push(`/groups/${id}/news`)}>
+                            <span>Новости группы: </span>{newsTotal}
                     </div>
                 ) : (
-                    <div className={style.empty}>{`<Эта группа пуста>`}</div>
+                    <div className={style.empty}>{`<Группа пуста>`}</div>
                 )
             }
 
@@ -64,7 +67,8 @@ const GroupItem = ( { id, cover, avatar, name, description, link, news } ) => {
                 >
                     <Icon name="plus" />
                 </Button>
-                <Button type="small" title="Изменить" onClick={() => history.push(`/groups/${id}`)}>
+                <Button type="small" title="Изменить"
+                        onClick={() => history.push(`/groups/${id}`)}>
                     <Icon name="edit" />
                 </Button>
                 <Button type="small" title="Удалить" onClick={deleteModal.show}>
@@ -79,4 +83,4 @@ const GroupItem = ( { id, cover, avatar, name, description, link, news } ) => {
 
 }
 
-export default GroupItem
+export default GroupItem;

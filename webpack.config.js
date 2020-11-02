@@ -13,7 +13,8 @@ module.exports = {
 
     output: {
         path: path.resolve(__dirname, "site"),
-        filename: "bundle.[chunkhash].js"
+        // filename: "bundle.[chunkhash].js"
+        filename: "bundle.js"
     },
 
     mode: env,
@@ -107,7 +108,8 @@ module.exports = {
             filename: "index.html"
         }),
         new MiniCSSExtractPlugin({
-            filename: 'style.[chunkhash].css'
+            // filename: 'style.[chunkhash].css'
+            filename: 'style.css'
             }
         ),
     ]

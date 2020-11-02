@@ -6,6 +6,7 @@ import NewsItem from "../NewsItem";
 import {updateNavigation} from "../../actions";
 
 import style from '../Groups/style.sass';
+import Navigation from "../Navigation";
 
 const News = (props) => {
 
@@ -17,21 +18,23 @@ const News = (props) => {
     const navigation = [
         {
             name: 'Группы',
-            link: '/#'
+            link: '/groups'
         },
         {
             name,
-            link: '/#/groups/'+groupId
+            link: '/groups/'+groupId
         },
         {
             name: 'Новости',
-            link: '/#/'+groupId+'/news'
+            link: '/groups/'+groupId+'/news'
         }
     ]
 
     useEffect(() => {dispatch(updateNavigation(navigation))}, []);
 
     return (
+        <>
+        <Navigation />
         <div className={style.panel}>
             <div
                 className={style['big-button']}
@@ -47,6 +50,7 @@ const News = (props) => {
                 }
             </div>
         </div>
+        </>
     )
 
 }

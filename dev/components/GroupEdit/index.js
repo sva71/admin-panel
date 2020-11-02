@@ -10,6 +10,7 @@ import {addGroup, updateGroup, updateNavigation} from "../../actions";
 import useNewId from "../../hooks/useNewId";
 
 import style from './style.sass';
+import Navigation from "../Navigation";
 
 const GroupEdit = (props) => {
 
@@ -18,6 +19,7 @@ const GroupEdit = (props) => {
     const id = +props.match.params.groupId;
     const newId = id || useNewId();
 
+    const baseURL = useSelector(store => store.settings);
     const [group, setGroup] = useState(id ?
         useSelector(store => store.groups)[id - 1] :
         { id, cover: '', name: '', avatar: '', description: '', link: '', news: []});
@@ -25,23 +27,101 @@ const GroupEdit = (props) => {
     const navigation = [
         {
             name: 'Группы',
-            link: '/#'
+            link: '/groups'
         },
         {
             name: id ? group.name : 'Новая группа',
-            link: '/#/groups/' + id
+            link: '/groups/' + id
         }
     ]
 
     useEffect(() => {dispatch(updateNavigation(navigation))}, []);
 
+    const transformGroup = (group) => {
+        return {
+            _id: group._id,
+            name: group.name,
+            coverID: group.cover,
+            avatarID: group.avatar,
+            description: group.description,
+            site: group.link,
+            total: {
+                likes: group.likesTotal,
+                posts: group.newsTotal
+            }
+        }
+    }
+
+    const doSave = () => {
+        if (id) {
+            fetch(baseURL + '/groups/' + group._id, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf8'
+                },
+                body: JSON.stringify(transformGroup(group))
+            })
+                .then(response => response.json())
+                .then(json => {
+                    console.log(json);
+                    dispatch(updateGroup({...group, cover: json.data.ID}))
+                })
+        } else {
+            fetch(baseURL + '/groups/', {
+                method: 'POST',
+                credentials: 'include',
+                headers: 'Content-Type: application/json',
+                body: JSON.stringify(transformGroup(group))
+            })
+                .then(response => response.json())
+                .then(() => {
+                    dispatch(addGroup({...group, id: newId}))
+                })
+        }
+        history.push('/groups');
+    }
+
     const saveClicked = () => {
-        id ? dispatch(updateGroup(group)) : dispatch(addGroup({...group, id: newId}));
-        history.push('/');
+
+        const coverFile = document.getElementById('cover-file');
+        if (coverFile.files.length) {
+            let data = new FormData();
+            data.append('file', coverFile.files[0]);
+            fetch(baseURL + '/s/files', {
+                method: 'POST',
+                credentials: 'include',
+                headers: 'Content-Type: multipart/form-data',
+                body: data
+            })
+                .then(response => response.json())
+                .then(json => {
+                    setGroup({...group, cover: json.data.ID});
+                })
+        }
+
+        const avatarFile = document.getElementById('avatar-file');
+        if (avatarFile.files.length) {
+            let data = new FormData();
+            data.append('file', avatarFile.files[0]);
+            fetch(baseURL + '/s/files', {
+                method: 'POST',
+                credentials: 'include',
+                headers: 'Content-Type: multipart/form-data',
+                body: data
+            })
+                .then(response => response.json())
+                .then(json => {
+                    setGroup({...group, avatar: json.data.ID});
+                })
+        }
+
+        doSave();
+
     }
 
     const cancelClicked = () => {
-        history.push('/');
+        history.push('/groups');
     }
 
     const valueChanged = (e) => {
@@ -49,14 +129,17 @@ const GroupEdit = (props) => {
     }
 
     return (
+        <>
+        <Navigation />
         <div className={style.wrapper}>
+
             <Form>
 
                 <Form.Group as={Row}>
 
                     <Form.Label column sm="2" className="mt-3">Обложка:</Form.Label>
                     <Col sm="10">
-                        <Form.File className="mt-3" accept="image/*" />
+                        <Form.File className="mt-3" id="cover-file" accept="image/*" />
                     </Col>
 
                     <Form.Label column sm="2" className="mt-3">Имя группы:</Form.Label>
@@ -74,7 +157,7 @@ const GroupEdit = (props) => {
 
                     <Form.Label column sm="2" className="mt-3">Аватар:</Form.Label>
                     <Col sm="10">
-                        <Form.File className="mt-3" accept="image/*"/>
+                        <Form.File className="mt-3" id="avatar-file" accept="image/*"/>
                     </Col>
 
                     <Form.Label column sm="2" className="mt-3">Описание:</Form.Label>
@@ -120,6 +203,7 @@ const GroupEdit = (props) => {
 
             </Form>
         </div>
+        </>
     )
 
 }

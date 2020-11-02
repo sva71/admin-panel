@@ -1,5 +1,5 @@
 const defaultSettings = {
-    baseURL: 'http://89.223.94.143:3255/api/v1',
+    baseURL: 'http://89.223.94.143/api/v1',
     authenticated: false
 }
 

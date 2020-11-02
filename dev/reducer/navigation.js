@@ -1,13 +1,11 @@
 const navigation = [
     {
         name: 'Группы',
-        link: '/'
+        link: '/groups'
     }
 ];
 
 const navigationReducer = (state = navigation, action) => {
-
-    const {navigation} = state;
 
     switch (action.type) {
         case 'UPDATE_NAVIGATION':
