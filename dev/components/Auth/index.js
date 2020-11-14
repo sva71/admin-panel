@@ -30,8 +30,6 @@ const Auth = () => {
     }
 
     const doLogin = () => {
-        // dispatch(setAuthenticated(true));
-        // history.push('/groups');
         setLoading(true);
         const request = fetch(baseURL+'/users/authentication/email/', {
             method: 'POST',

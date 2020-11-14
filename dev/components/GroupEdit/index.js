@@ -19,7 +19,7 @@ const GroupEdit = (props) => {
     const id = +props.match.params.groupId;
     const newId = id || useNewId();
 
-    const baseURL = useSelector(store => store.settings);
+    const {baseURL} = useSelector(store => store.settings);
     const [group, setGroup] = useState(id ?
         useSelector(store => store.groups)[id - 1] :
         { id, cover: '', name: '', avatar: '', description: '', link: '', news: []});
@@ -37,86 +37,82 @@ const GroupEdit = (props) => {
 
     useEffect(() => {dispatch(updateNavigation(navigation))}, []);
 
-    const transformGroup = (group) => {
+    const transformGroup = (groupUpdated) => {
         return {
-            _id: group._id,
-            name: group.name,
-            coverID: group.cover,
-            avatarID: group.avatar,
-            description: group.description,
-            site: group.link,
+            _id: groupUpdated._id,
+            name: groupUpdated.name,
+            coverID: groupUpdated.cover,
+            avatarID: groupUpdated.avatar,
+            description: groupUpdated.description,
+            site: groupUpdated.link,
             total: {
-                likes: group.likesTotal,
-                posts: group.newsTotal
+                likes: groupUpdated.likesTotal,
+                posts: groupUpdated.newsTotal
             }
         }
     }
 
-    const doSave = () => {
+    const saveClicked = () => {
+
+        let groupToSave = JSON.parse(JSON.stringify(group));
+
+        const coverFile = document.getElementById('cover-file');
+        const avatarFile = document.getElementById('avatar-file');
+
+        const coverData = new FormData();
+        const avatarData = new FormData();
+
+        coverFile.files.length && coverData.append('file', coverFile.files[0]);
+        avatarFile.files.length && avatarData.append('file', avatarFile.files[0]);
+
+        let savePromise, postFunction;
         if (id) {
-            fetch(baseURL + '/groups/' + group._id, {
+            savePromise = () => fetch(baseURL + '/groups/' + groupToSave._id + '/', {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json; charset=utf8'
                 },
-                body: JSON.stringify(transformGroup(group))
+                body: JSON.stringify(transformGroup(groupToSave))
             })
-                .then(response => response.json())
-                .then(json => {
-                    console.log(json);
-                    dispatch(updateGroup({...group, cover: json.data.ID}))
-                })
+                .then(response => response.json());
+            postFunction = () => dispatch(updateGroup(groupToSave));
         } else {
-            fetch(baseURL + '/groups/', {
+            savePromise = () => fetch(baseURL + '/groups/', {
                 method: 'POST',
                 credentials: 'include',
-                headers: 'Content-Type: application/json',
-                body: JSON.stringify(transformGroup(group))
+                headers: {
+                    'Content-Type': 'application/json; charset=utf8'
+                },
+                body: JSON.stringify(transformGroup(groupToSave))
             })
-                .then(response => response.json())
-                .then(() => {
-                    dispatch(addGroup({...group, id: newId}))
-                })
-        }
-        history.push('/groups');
-    }
-
-    const saveClicked = () => {
-
-        const coverFile = document.getElementById('cover-file');
-        if (coverFile.files.length) {
-            let data = new FormData();
-            data.append('file', coverFile.files[0]);
-            fetch(baseURL + '/s/files', {
-                method: 'POST',
-                credentials: 'include',
-                headers: 'Content-Type: multipart/form-data',
-                body: data
-            })
-                .then(response => response.json())
-                .then(json => {
-                    setGroup({...group, cover: json.data.ID});
-                })
+                .then(response => response.json());
+            postFunction = () => dispatch(addGroup({...groupToSave, id: newId}));
         }
 
-        const avatarFile = document.getElementById('avatar-file');
-        if (avatarFile.files.length) {
-            let data = new FormData();
-            data.append('file', avatarFile.files[0]);
-            fetch(baseURL + '/s/files', {
-                method: 'POST',
-                credentials: 'include',
-                headers: 'Content-Type: multipart/form-data',
-                body: data
-            })
-                .then(response => response.json())
-                .then(json => {
-                    setGroup({...group, avatar: json.data.ID});
-                })
-        }
+        const coverPromise = () => coverFile.files.length ? fetch(baseURL + '/s/files/', {
+            method: 'POST',
+            credentials: 'include',
+            body: coverData
+        })
+            .then(response => response.json()) : null;
+        
+        const avatarPromise = () => avatarFile.files.length ? fetch(baseURL + '/s/files/', {
+            method: 'POST',
+            credentials: 'include',
+            body: avatarData
+        })
+            .then(response => response.json()) : null;
 
-        doSave();
+        Promise.all([coverPromise(), avatarPromise()])
+            .then(jsons => {
+                if (jsons[0]) jsons[0].error || (groupToSave.cover = jsons[0].data._id);
+                if (jsons[1]) jsons[1].error || (groupToSave.avatar = jsons[1].data._id);
+                savePromise().then(() => {
+                    postFunction();
+                    history.push('/groups');
+                })
+            })
 
     }
 

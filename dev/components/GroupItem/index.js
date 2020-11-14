@@ -24,11 +24,11 @@ const GroupItem = ( { id, cover, avatar, name, description, link, newsTotal } ) 
         });
 
     const coverImage = {
-        backgroundImage: `url("${baseURL}/s/files/${cover}")`
+        backgroundImage: `url("${baseURL}/s/files/${cover}/")`
     }
 
     const avatarImage = {
-        backgroundImage: `url("${baseURL}/s/files/${avatar}")`
+        backgroundImage: `url("${baseURL}/s/files/${avatar}/")`
     }
 
     return (

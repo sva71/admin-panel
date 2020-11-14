@@ -1,5 +1,5 @@
 const defaultSettings = {
-    baseURL: 'http://89.223.94.143/api/v1',
+    baseURL: 'https://pet-app.ru/api/v1',
     authenticated: false
 }
 

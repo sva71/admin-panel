@@ -34,7 +34,7 @@ const Groups = () => {
     useEffect(() => {
         dispatch(updateNavigation(navigation));
         setLoading(true);
-        fetch(baseURL + '/groups?_from=0&_to=20', {
+        fetch(baseURL + '/groups/?_from=0&_to=99', {
             method: 'GET',
             credentials: 'include'
         })
@@ -44,7 +44,13 @@ const Groups = () => {
                 if (json.error) {
                     setGroupsError({ isError: true, errorMsg: json.error.message })
                 } else {
-                    const groups = json.data.map((item, index) => {
+                    const groups = json.data
+                        .sort((a, b) => {
+                            if (a._id < b._id) return -1;
+                            if (a._id > b._id) return 1;
+                            return 0;
+                        })
+                        .map((item, index) => {
                         return {
                             id: index + 1,
                             _id: item._id,

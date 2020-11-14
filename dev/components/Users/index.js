@@ -24,7 +24,7 @@ const Users = () => {
 
     const searchClicked = () => {
         setLoading(true);
-        fetch(baseURL + '/users/' + searchEmail, {
+        fetch(baseURL + '/users/' + searchEmail + '/', {
             method: 'GET',
             credentials: 'include'
         })
@@ -46,7 +46,7 @@ const Users = () => {
 
     const saveClicked = () => {
         setLoading(true);
-        fetch(baseURL + '/users/' + user.ID + '?_role=' + user.role, {
+        fetch(baseURL + '/users/' + user.ID + '/?_role=' + user.role, {
             method: 'PATCH',
             credentials: 'include'
         })

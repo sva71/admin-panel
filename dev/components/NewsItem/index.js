@@ -5,29 +5,28 @@ import {useHistory} from "react-router";
 import style from '../GroupItem/style.sass';
 import Button from "../Button";
 import Icon from "../Icon";
-import useOkCancelModal from "../../hooks/useOkCancelModal";
-import {updateGroup} from "../../actions";
 
-const NewsItem = ({id, image, body, gId}) => {
+import useOkCancelModal from "../../hooks/useOkCancelModal";
+import {deleteNews} from "../../actions";
+
+const NewsItem = ({id, _id, groupId, titleID, content}) => {
 
     const history = useHistory();
     const dispatch = useDispatch();
-    const group = useSelector(store => store.groups[gId - 1]);
-    const {news} = useSelector(store => store.groups[gId - 1]);
-    const brief = (body.length > 100) ? body.slice(0, 100) +  '...' : body.slice(0, 100);
+    const {baseURL} = useSelector(store => store.settings);
+    const brief = (content.length > 100) ? content.slice(0, 100) +  '...' : content;
 
     const deleteModal = useOkCancelModal('Внимание!',
         () => (<p>Вы действительно хотите удалить эту новость?</p>),
         () => {
-            dispatch(updateGroup({
-                ...group,
-                news: news.filter((item) => item.id !== id)
-            }))
-        });
+            const delPromise = () => fetch(baseURL + '/posts/' + _id + '/',{
+                method: 'DELETE',
+                credentials: 'include'
+                }).then(response => response.json());
+            delPromise().then(json => json.error || dispatch(deleteNews(id)))
+            });
 
-    const imageBgr = {
-        backgroundImage: `url("${image}")`
-    }
+    const imageBgr = { backgroundImage: `url("${baseURL}/s/files/${titleID}/")` }
 
     return (
         <div className={style.group__item}>
@@ -40,7 +39,7 @@ const NewsItem = ({id, image, body, gId}) => {
 
             <div className={style['group__item-footer']}>
                 <Button type="small" title="Изменить"
-                        onClick={() => history.push(`/groups/${gId}/news/${id}`)}>
+                        onClick={() => history.push(`/groups/${groupId}/news/${id}`)}>
                     <Icon name="edit" />
                 </Button>
                 <Button type="small" title="Удалить" onClick={deleteModal.show}>
